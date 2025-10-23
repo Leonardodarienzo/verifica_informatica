@@ -1,0 +1,113 @@
+🧩 Entità e Attributi
+Amministratori
+-admin_id (PK, int, autoincrement)
+
+-email (varchar(100), unico, not null)
+
+-password_hash (char(60), not null)
+
+-nome (varchar(50), not null)
+
+-cognome (varchar(50), not null)
+
+Utenti
+-utente_id (PK, int, autoincrement)
+
+-email (varchar(100), unico, not null)
+
+-password_hash (char(60), not null)
+
+-nome (varchar(50), not null)
+
+-cognome (varchar(50), not null)
+
+-telefono (varchar(20))
+
+Veicoli
+-veicolo_id (PK, int, autoincrement)
+
+-utente_id (FK → Utenti.utente_id, not null)
+
+-targa (varchar(10), unico, not null)
+
+-modello (varchar(50))
+
+-produttore (varchar(50))
+
+capacita_batteria_kwh (decimal(5,2))
+
+Colonnine
+-colonnina_id (PK, int, autoincrement)
+
+-indirizzo (varchar(255), not null)
+
+-quartiere (varchar(100))
+
+-latitudine (decimal(10,8), not null)
+
+-longitudine (decimal(11,8), not null)
+
+-potenza_kw (decimal(5,2), not null)
+
+-nil (varchar(50), unico)
+
+Ricariche
+-ricarica_id (PK, int, autoincrement)
+
+-utente_id (FK → Utenti.utente_id, not null)
+
+-colonnina_id (FK → Colonnine.colonnina_id, not null)
+
+-data_ora_inizio (datetime, not null)
+
+-data_ora_fine (datetime, not null)
+
+-energia_erogata_kwh (decimal(6,3), not null)
+
+Prenotazioni
+-prenotazione_id (PK, int, autoincrement)
+
+-utente_id (FK → Utenti.utente_id, not null)
+
+-colonnina_id (FK → Colonnine.colonnina_id, not null)
+
+-data_ora_inizio_prenotazione (datetime, not null)
+
+-data_ora_fine_prenotazione (datetime, not null)
+
+-stato (ENUM: Attiva, Completata, Annullata, Scaduta)
+
+Sessioni
+-sessione_id (PK, int, autoincrement)
+
+-token_sessione (char(64), unico, not null)
+
+-tipo_utente (ENUM: utente, admin, not null)
+
+-riferimento_id (int, not null)
+
+-data_creazione (datetime, default: now())
+
+-data_scadenza (datetime, not null)
+
+Predizioni_ML
+-predizione_id (PK, int, autoincrement)
+
+-colonnina_id (FK → Colonnine.colonnina_id, not null)
+
+-data_predizione (date, not null)
+
+-risultato_predizione (ENUM: basso, medio, alto, not null)
+
+-probabilita (decimal(5,4))
+
+Log_Sistema
+-log_id (PK, int, autoincrement)
+
+-data_ora (datetime, default: now())
+
+-livello (ENUM: INFO, WARN, ERROR)
+
+-messaggio (text, not null)
+
+-utente_riferimento_id (int, può essere NULL)
