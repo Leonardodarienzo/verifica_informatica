@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="text-danger">Pannello Amministratore</h2>
+<p>Benvenuto, {{ session.get('user_name') }}! Ruolo: {{ session.get('role') }}.</p>
+<hr>
+<h3>Funzionalità (Punto 2)</h3>
+<ul>
+    <li>Gestione Colonnine (Inserimento, Modifica, Eliminazione)</li>
+    <li>Gestione Utenti (Inserimento, Modifica, Eliminazione)</li>
+    <li>Elenco Ricariche Totali</li>
+    <li>Report e Grafici sull'Utilizzo (Ricariche al giorno per quartiere)</li>
+    <li>Accesso alle Interfacce di Predizione (Punto 7)</li>
+</ul>
+{% endblock %}

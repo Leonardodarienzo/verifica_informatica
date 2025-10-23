@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block head_content %}
+<script async 
+    src="https://maps.googleapis.com/maps/api/js?key=LA_TUA_GOOGLE_MAPS_API_KEY&callback=initMap">
+</script>
+<style>
+    /* Assicuriamoci che la mappa abbia dimensioni fisse per essere visibile */
+    #map {
+        height: 600px;
+        width: 100%;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Mappa Interattiva delle Colonnine</h2>
+<p>Benvenuto, {{ session.get('user_name') }}! Clicca su un marker per vedere i dettagli e prenotare una colonnina libera.</p>
+
+<div id="map"></div>
+
+<div class="modal fade" id="stationModal" tabindex="-1" role="dialog" aria-labelledby="stationModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="stationModalLabel">Dettagli Colonnina</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Indirizzo:</strong> <span id="modal_address"></span></p>
+                <p><strong>Potenza:</strong> <span id="modal_power"></span> kW</p>
+                <p><strong>Stato:</strong> <span id="modal_status"></span></p>
+                <p><strong>NIL:</strong> <span id="modal_nil"></span></p>
+                <input type="hidden" id="modal_station_id"> 
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Chiudi</button>
+                <button type="button" class="btn btn-success" id="btnPrenota">Prenota Ora</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // URL del futuro server API (non usato in questa versione MOCK)
+    const API_BASE_URL = '{{ API_SERVER_URL }}'; 
+    
+    // Icone di default di Google Maps (rossa e verde)
+    const ICON_GREEN = 'http://googleusercontent.com/maps/vt/icon/name=icons/spotlight/spotlight-poi-green.png&scale=1';
+    const ICON_RED = 'http://googleusercontent.com/maps/vt/icon/name=icons/spotlight/spotlight-poi-red.png&scale=1';
+
+    let map;
+
+    // 1. Funzione di inizializzazione della mappa (chiamata dall'API Google Maps)
+    function initMap() {
+        // Coordinate centrali (Milano)
+        const milano = { lat: 45.4642, lng: 9.1900 }; 
+        
+        map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 13,
+            center: milano,
+        });
+
+        // Avvia il processo per caricare i dati delle colonnine (usando dati hardcoded per ora)
+        loadStations();
+    }
+
+    // 2. Funzione per caricare i dati delle colonnine dal Server API (MOCK HARDCODED)
+    function loadStations() {
+        // ⚠️ DATI HARDCODED: Questa è la versione che NON dipende dal server API
+        const stations = [
+            // Dati che simulano la struttura che ci aspetteremmo dal DB/API
+            {'colonnina_id': 1, 'indirizzo': "Via Roma 1", 'latitudine': 45.4678, 'longitudine': 9.1901, 'potenza_kw': 22, 'nil_quartiere': "NIL 1", 'stato': 'libera'},
+            {'colonnina_id': 2, 'indirizzo': "Piazza Duomo 10", 'latitudine': 45.4645, 'longitudine': 9.1895, 'potenza_kw': 50, 'nil_quartiere': "NIL 1", 'stato': 'occupata'},
+            {'colonnina_id': 3, 'indirizzo': "Viale Monza 50", 'latitudine': 45.5000, 'longitudine': 9.2250, 'potenza_kw': 11, 'nil_quartiere': "NIL 2", 'stato': 'libera'}
+        ];
+
+        stations.forEach(station => {
+            addMarker(station);
+        });
+    }
+
+    // 3. Funzione per aggiungere un marker alla mappa
+    function addMarker(station) {
+        const marker = new google.maps.Marker({
+            position: { lat: station.latitudine, lng: station.longitudine }, 
+            map: map,
+            title: station.indirizzo,
+            // Sceglie l'icona in base allo stato
+            icon: station.stato === 'libera' ? ICON_GREEN : ICON_RED, 
+            stationData: station 
+        });
+
+        // Aggiunge un listener al click del marker
+        marker.addListener('click', () => {
+            showStationDetails(station);
+        });
+    }
+
+    // 4. Funzione per mostrare i dettagli (nel Modal) e gestire la prenotazione
+    function showStationDetails(station) {
+        // Aggiorna il contenuto del Modal (usa i nomi dei campi del DB)
+        document.getElementById('modal_address').textContent = station.indirizzo;
+        document.getElementById('modal_power').textContent = station.potenza_kw;
+        document.getElementById('modal_status').textContent = station.stato.toUpperCase();
+        document.getElementById('modal_nil').textContent = station.nil_quartiere;
+        document.getElementById('modal_station_id').value = station.colonnina_id;
+
+        const btnPrenota = document.getElementById('btnPrenota');
+
+        if (station.stato === 'libera') {
+            btnPrenota.disabled = false;
+            btnPrenota.textContent = "Prenota Colonnina";
+            btnPrenota.classList.remove('btn-danger');
+            btnPrenota.classList.add('btn-success');
+            
+            btnPrenota.onclick = function() {
+                // Funzione di prenotazione simulata
+                handleReservation(station.colonnina_id);
+            };
+
+        } else {
+            btnPrenota.disabled = true;
+            btnPrenota.textContent = "Occupata";
+            btnPrenota.classList.remove('btn-success');
+            btnPrenota.classList.add('btn-danger');
+            btnPrenota.onclick = null;
+        }
+
+        // Mostra il modal (richiede jQuery/Bootstrap)
+        $('#stationModal').modal('show');
+    }
+    
+    // 5. Funzione di Prenotazione (SIMULATA)
+    function handleReservation(stationId) {
+        // Quando avremo l'API, questa funzione farà una chiamata fetch.
+        // Per ora:
+        alert(`Colonnina ID ${stationId} prenotata con successo (simulazione UI)!`);
+        $('#stationModal').modal('hide');
+    }
+</script>
+{% endblock %}

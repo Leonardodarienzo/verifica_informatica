@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="jumbotron">
+    <h1 class="display-4">Benvenuto nel Progetto EcoCharge!</h1>
+    <p class="lead">Il sistema per l'analisi e la gestione delle colonnine di ricarica dei veicoli elettrici del Comune di Milano.</p>
+    <hr class="my-4">
+    <p>Per iniziare, effettua il login o esplora la mappa (se loggato).</p>
+    <a class="btn btn-primary btn-lg" href="{{ url_for('login') }}" role="button">Vai al Login</a>
+</div>
+{% endblock %}
